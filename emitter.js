@@ -47,7 +47,9 @@ function getEmitter() {
         off: function (event, context) {
             for (let eventName of this.events.keys()) {
                 if (eventName === event || eventName.startsWith(event + '.')) {
-                    this.events.get(event).get(context).pop();
+                    this.events.get(event)
+                        .get(context)
+                        .pop();
                 }
             }
 
