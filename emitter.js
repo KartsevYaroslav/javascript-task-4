@@ -41,11 +41,19 @@ function getEmitter() {
         off: function (event, context) {
             const eventsNames = event.split('.');
             const nestedEvent = this.getNestedEvent(eventsNames, eventsNames.length);
-            const index = nestedEvent.observes.findIndex(x => x.context === context);
-            nestedEvent.observes.splice(index, 1);
-            console.info(event, context);
+            this.removeRecursive(nestedEvent, context);
 
             return this;
+        },
+
+        removeRecursive: function (event, context) {
+            const index = event.observes.findIndex(x => x.context === context);
+            event.observes.splice(index, 1);
+            for (let key in event) {
+                if (key !== 'observes') {
+                    this.removeRecursive(event[key]);
+                }
+            }
         },
 
         getNestedEvent: function (eventsNames, deepLvl) {
@@ -74,7 +82,6 @@ function getEmitter() {
                 con = this.getNestedEvent(eventsNames, eventsNames.length - i);
                 con.observes.forEach(x => x.handler.call(x.context));
             }
-            console.info(event);
 
             return this;
         },
