@@ -68,10 +68,8 @@ function getEmitter() {
                 const eventName = eventParts.slice(0, eventParts.length - i);
                 eventNames.push(eventName.join('.'));
             }
-            for (let e of eventNames) {
-                if (!this.events.has(e)) {
-                    this.events.set(e, new Map());
-                }
+
+            for (let e of eventNames.filter(x => this.events.has(x))) {
                 let currEvent = this.events.get(e);
                 for (let context of currEvent.keys()) {
                     currEvent
