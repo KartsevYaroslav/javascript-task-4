@@ -63,9 +63,9 @@ function getEmitter() {
         emit: function (event) {
             const eventParts = event.split('.');
             const eventNames = [];
-            eventNames.push(event)
-            for (let i=1;i<eventParts.length;i++){
-                const eventName = eventParts.slice(0,eventParts.length-i);
+            eventNames.push(event);
+            for (let i = 1; i < eventParts.length; i++) {
+                const eventName = eventParts.slice(0, eventParts.length - i);
                 eventNames.push(eventName.join('.'));
             }
             for (let e of eventNames) {
