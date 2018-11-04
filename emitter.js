@@ -48,8 +48,7 @@ function getEmitter() {
             for (let eventName of this.events.keys()) {
                 if (eventName === event || eventName.startsWith(event + '.')) {
                     this.events.get(event)
-                        .get(context)
-                        .pop();
+                        .delete(context);
                 }
             }
 
