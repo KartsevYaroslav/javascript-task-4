@@ -9,7 +9,7 @@ const isStar = false;
 function execute(contexts) {
     for (let [context, handlers] of contexts) {
         for (let handler of handlers) {
-            handler.apply(context);
+            handler.call(context);
         }
     }
 }
@@ -69,17 +69,12 @@ function getEmitter() {
          * @param {String} event
          */
         emit: function (event) {
-            const eventNames = [event];
-            let lastDotIndex = event.lastIndexOf('.');
-
-            while (lastDotIndex !== -1) {
-                const subString = event.substring(0, lastDotIndex);
-                eventNames.push(subString);
-                lastDotIndex = subString.indexOf('.');
+            while (event !== '') {
+                if (events.has(event)) {
+                    execute(events.get(event));
+                }
+                event = event.substring(0, event.lastIndexOf('.'));
             }
-
-            eventNames.filter(e => events.has(e))
-                .forEach(e => execute(events.get(e)));
 
             return this;
         },
