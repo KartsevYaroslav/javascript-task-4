@@ -20,7 +20,7 @@ function execute(contexts) {
  */
 
 function getEmitter() {
-    const events = new Map();
+    let events = new Map();
 
     return {
 
