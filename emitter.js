@@ -6,6 +6,14 @@
  */
 const isStar = false;
 
+function execute(contexts) {
+    for (let [context, handlers] of contexts) {
+        for (let handler of handlers) {
+            handler.apply(context);
+        }
+    }
+}
+
 /**
  * Возвращает новый emitter
  * @returns {Object}
@@ -71,12 +79,7 @@ function getEmitter() {
             }
 
             eventNames.filter(e => events.has(e))
-                .forEach(e => {
-                    events.get(e)
-                        .forEach((handlers, context) => {
-                            handlers.forEach(handler => handler.call(context));
-                        });
-                });
+                .forEach(e => execute(events.get(e)));
 
             return this;
         },
