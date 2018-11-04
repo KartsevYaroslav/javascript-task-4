@@ -27,11 +27,11 @@ function getEmitter() {
             if (!events.has(event)) {
                 events.set(event, new Map());
             }
-            let contexts = events.get(event);
+            const contexts = events.get(event);
             if (!contexts.has(context)) {
                 contexts.set(context, []);
             }
-            let handlers = contexts.get(context);
+            const handlers = contexts.get(context);
 
             handlers.push(handler);
 
@@ -90,7 +90,6 @@ function getEmitter() {
          * @param {Number} times – сколько раз получить уведомление
          */
         several: function (event, context, handler, times) {
-            console.info(event, context, handler, times);
         },
 
         /**
@@ -102,13 +101,11 @@ function getEmitter() {
          * @param {Number} frequency – как часто уведомлять
          */
         through: function (event, context, handler, frequency) {
-            console.info(event, context, handler, frequency);
         }
     };
 }
 
 module.exports = {
     getEmitter,
-
     isStar
 };
