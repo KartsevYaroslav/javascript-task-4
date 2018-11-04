@@ -16,7 +16,6 @@ function getEmitter() {
 
     return {
 
-
         /**
          * @returns {Object}
          * Подписаться на событие
@@ -28,13 +27,13 @@ function getEmitter() {
             if (!events.has(event)) {
                 events.set(event, new Map());
             }
-            let currContext = events.get(event);
-            if (!currContext.has(context)) {
-                currContext.set(context, []);
+            let contexts = events.get(event);
+            if (!contexts.has(context)) {
+                contexts.set(context, []);
             }
-            let currHandlers = currContext.get(context);
+            let handlers = contexts.get(context);
 
-            currHandlers.push(handler);
+            handlers.push(handler);
 
             return this;
         },
@@ -71,16 +70,13 @@ function getEmitter() {
                 lastDotIndex = subString.indexOf('.');
             }
 
-            for (let e of eventNames.filter(x => events.has(x))) {
-                let currEvent = events.get(e);
-                for (let context of currEvent.keys()) {
-                    currEvent
-                        .get(context)
-                        .forEach(handler => {
-                            handler.call(context);
+            eventNames.filter(e => events.has(e))
+                .forEach(e => {
+                    events.get(e)
+                        .forEach((handlers, context) => {
+                            handlers.forEach(handler => handler.call(context));
                         });
-                }
-            }
+                });
 
             return this;
         },
