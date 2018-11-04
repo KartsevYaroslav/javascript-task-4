@@ -14,7 +14,7 @@ const isStar = false;
 function getEmitter() {
     return {
 
-        events: {},
+        events: new Map(),
 
         /**
          * @returns {Object}
@@ -24,10 +24,16 @@ function getEmitter() {
          * @param {Function} handler
          */
         on: function (event, context, handler) {
-            const eventsNames = event.split('.');
-            console.info(event, context, handler);
-            let con = this.getNestedEvent(eventsNames, eventsNames.length);
-            con.observes.push({ context: context, handler: handler });
+            if (!this.events.has(event)) {
+                this.events.set(event, new Map());
+            }
+            let currEvent = this.events.get(event);
+            if (!currEvent.has(context)) {
+                currEvent.set(context, []);
+            }
+            let currContext = currEvent.get(context);
+
+            currContext.push(handler);
 
             return this;
         },
@@ -39,35 +45,13 @@ function getEmitter() {
          * @param {Object} context
          */
         off: function (event, context) {
-            const eventsNames = event.split('.');
-            const nestedEvent = this.getNestedEvent(eventsNames, eventsNames.length);
-            this.removeRecursive(nestedEvent, context);
+            for (let eventName of this.events.keys()) {
+                if (eventName === event || eventName.startsWith(event + '.')) {
+                    this.events.get(event).get(context).pop();
+                }
+            }
 
             return this;
-        },
-
-        removeRecursive: function (event, context) {
-            const index = event.observes.findIndex(x => x.context === context);
-            event.observes.splice(index, 1);
-            for (let key in event) {
-                if (key !== 'observes') {
-                    this.removeRecursive(event[key]);
-                }
-            }
-        },
-
-        getNestedEvent: function (eventsNames, deepLvl) {
-            let context = this.events;
-            for (let i = 0; i < deepLvl; i++) {
-                if (context[eventsNames[i]] === undefined) {
-                    context[eventsNames[i]] = {
-                        observes: []
-                    };
-                }
-                context = context[eventsNames[i]];
-            }
-
-            return context;
         },
 
         /**
@@ -76,11 +60,28 @@ function getEmitter() {
          * @param {String} event
          */
         emit: function (event) {
-            const eventsNames = event.split('.');
-            let con;
-            for (let i = 0; i < eventsNames.length; i++) {
-                con = this.getNestedEvent(eventsNames, eventsNames.length - i);
-                con.observes.forEach(x => x.handler.call(x.context));
+            if (!this.events.has(event)) {
+                this.events.set(event, new Map());
+            }
+            for (let context of this.events.get(event)
+                .keys()) {
+                this.events.get(event)
+                    .get(context)
+                    .forEach(handler => {
+                        handler.call(context);
+                    });
+            }
+            const prefix = event.split('.')[0];
+
+            if (prefix !== event) {
+                for (let context of this.events.get(prefix)
+                    .keys()) {
+                    this.events.get(prefix)
+                        .get(context)
+                        .forEach(handler => {
+                            handler.call(context);
+                        });
+                }
             }
 
             return this;
