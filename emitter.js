@@ -90,6 +90,7 @@ function getEmitter() {
          * @param {Number} times – сколько раз получить уведомление
          */
         several: function (event, context, handler, times) {
+            console.info(event, context, handler, times);
         },
 
         /**
@@ -101,6 +102,7 @@ function getEmitter() {
          * @param {Number} frequency – как часто уведомлять
          */
         through: function (event, context, handler, frequency) {
+            console.info(event, context, handler, frequency);
         }
     };
 }
