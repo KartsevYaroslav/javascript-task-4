@@ -51,6 +51,7 @@ function getEmitter() {
          * @returns {Object}
          */
         off: function (event, context) {
+            console.info(event, context);
             for (let eventName in events) {
                 if (eventName === event || eventName.startsWith(event + '.')) {
                     events[eventName].delete(context);
@@ -66,14 +67,17 @@ function getEmitter() {
          * @returns {Object}
          */
         emit: function (event) {
-            console.info(event);
-            while (event !== '') {
-                const contexts = events[event];
-                if (contexts) {
-                    execute(contexts);
-                }
-                event = event.substring(0, event.lastIndexOf('.'));
+            const eventNames = [event];
+            let lastDotIndex = event.lastIndexOf('.');
+
+            while (lastDotIndex !== -1) {
+                const subString = event.substring(0, lastDotIndex);
+                eventNames.push(subString);
+                lastDotIndex = subString.indexOf('.');
             }
+
+            eventNames.filter(e => events.hasOwnProperty(e))
+                .forEach(e => execute(events[e]));
 
             return this;
         },
