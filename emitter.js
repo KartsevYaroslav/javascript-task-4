@@ -4,22 +4,43 @@
  * Сделано задание на звездочку
  * Реализованы методы several и through
  */
-const isStar = false;
-
-function execute(contexts) {
-    for (let [context, handlers] of contexts) {
-        for (let handler of handlers) {
-            handler.apply(context);
-        }
-    }
-}
+const isStar = true;
 
 /**
  * Возвращает новый emitter
  * @returns {Object}
  */
 function getEmitter() {
-    let events = {};
+    const events = {};
+
+    function execute(contexts) {
+        contexts.forEach((eventHandlers, context) => {
+            eventHandlers.forEach(event => {
+                if (event.exeCount < event.times && event.exeCount % event.frequency === 0) {
+                    event.handler.call(context);
+                }
+                event.exeCount++;
+            });
+        });
+    }
+
+    function subscribe(event, context, handler, info = { times: Infinity, frequency: 1 }) {
+        console.info(event, context, handler);
+        if (!events[event]) {
+            events[event] = new Map();
+        }
+        if (!events[event].get(context)) {
+            events[event].set(context, []);
+        }
+        const { times, frequency } = info;
+        events[event].get(context)
+            .push({
+                handler: handler,
+                exeCount: 0,
+                times: times,
+                frequency: frequency
+            });
+    }
 
     return {
 
@@ -31,15 +52,7 @@ function getEmitter() {
          * @returns {Object}
          */
         on: function (event, context, handler) {
-            console.info(event, context, handler);
-            if (!events[event]) {
-                events[event] = new Map();
-            }
-            if (!events[event].get(context)) {
-                events[event].set(context, []);
-            }
-            events[event].get(context)
-                .push(handler);
+            subscribe(event, context, handler);
 
             return this;
         },
@@ -89,9 +102,14 @@ function getEmitter() {
          * @param {Object} context
          * @param {Function} handler
          * @param {Number} times – сколько раз получить уведомление
+         * @returns {Object}
          */
         several: function (event, context, handler, times) {
-            console.info(event, context, handler, times);
+            times = times <= 0 ? Infinity : times;
+
+            subscribe(event, context, handler, { times: times, frequency: 1 });
+
+            return this;
         },
 
         /**
@@ -101,9 +119,13 @@ function getEmitter() {
          * @param {Object} context
          * @param {Function} handler
          * @param {Number} frequency – как часто уведомлять
+         * @returns {Object}
          */
         through: function (event, context, handler, frequency) {
-            console.info(event, context, handler, frequency);
+            frequency = frequency <= 0 ? 1 : frequency;
+            subscribe(event, context, handler, { times: Infinity, frequency: frequency });
+
+            return this;
         }
     };
 }
