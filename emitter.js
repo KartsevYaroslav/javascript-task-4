@@ -9,7 +9,7 @@ const isStar = false;
 function execute(contexts) {
     for (let [context, handlers] of contexts) {
         for (let handler of handlers) {
-            handler.call(context);
+            handler.apply(context);
         }
     }
 }
@@ -18,45 +18,43 @@ function execute(contexts) {
  * Возвращает новый emitter
  * @returns {Object}
  */
-
 function getEmitter() {
-    let events = new Map();
+    let events = {};
 
     return {
 
         /**
-         * @returns {Object}
          * Подписаться на событие
          * @param {String} event
          * @param {Object} context
          * @param {Function} handler
+         * @returns {Object}
          */
         on: function (event, context, handler) {
-            if (!events.has(event)) {
-                events.set(event, new Map());
+            console.info(event, context, handler);
+            if (!events[event]) {
+                events[event] = new Map();
             }
-            const contexts = events.get(event);
-            if (!contexts.has(context)) {
-                contexts.set(context, []);
+            if (!events[event].get(context)) {
+                events[event].set(context, []);
             }
-            const handlers = contexts.get(context);
-
-            handlers.push(handler);
+            events[event].get(context)
+                .push(handler);
 
             return this;
         },
 
         /**
-         * @returns {Object}
          * Отписаться от события
          * @param {String} event
          * @param {Object} context
+         * @returns {Object}
          */
         off: function (event, context) {
-            for (let eventName of events.keys()) {
-                if (eventName === event || eventName.startsWith(event + '.')) {
-                    events.get(event)
-                        .delete(context);
+            console.info(event, context);
+            for (let e in events) {
+                if (e === event || e.startsWith(event + '.')) {
+                    events[e].delete(context);
                 }
             }
 
@@ -64,14 +62,16 @@ function getEmitter() {
         },
 
         /**
-         * @returns {Object}
          * Уведомить о событии
          * @param {String} event
+         * @returns {Object}
          */
         emit: function (event) {
+            console.info(event);
             while (event !== '') {
-                if (events.has(event)) {
-                    execute(events.get(event));
+                const contexts = events[event];
+                if (contexts) {
+                    execute(contexts);
                 }
                 event = event.substring(0, event.lastIndexOf('.'));
             }
