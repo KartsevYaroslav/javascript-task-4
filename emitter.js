@@ -66,17 +66,14 @@ function getEmitter() {
          * @returns {Object}
          */
         emit: function (event) {
-            const eventNames = [event];
-            let lastDotIndex = event.lastIndexOf('.');
-
-            while (lastDotIndex !== -1) {
-                const subString = event.substring(0, lastDotIndex);
-                eventNames.push(subString);
-                lastDotIndex = subString.indexOf('.');
+            console.info(event);
+            while (event !== '') {
+                const contexts = events[event];
+                if (contexts) {
+                    execute(contexts);
+                }
+                event = event.substring(0, event.lastIndexOf('.'));
             }
-
-            eventNames.filter(e => events.hasOwnProperty(e))
-                .forEach(e => execute(events[e]));
 
             return this;
         },
