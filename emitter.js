@@ -62,11 +62,13 @@ function getEmitter() {
          * @param {String} event
          */
         emit: function (event) {
-            const eventParts = event.split('.');
             const eventNames = [event];
-            for (let i = 1; i < eventParts.length; i++) {
-                const eventName = eventParts.slice(0, eventParts.length - i);
-                eventNames.push(eventName.join('.'));
+            let lastDotIndex = event.lastIndexOf('.');
+
+            while (lastDotIndex !== -1) {
+                const subString = event.substring(0, lastDotIndex);
+                eventNames.push(subString);
+                lastDotIndex = subString.indexOf('.');
             }
 
             for (let e of eventNames.filter(x => events.has(x))) {
