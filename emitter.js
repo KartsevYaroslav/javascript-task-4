@@ -51,10 +51,9 @@ function getEmitter() {
          * @returns {Object}
          */
         off: function (event, context) {
-            console.info(event, context);
             for (let eventName in events) {
                 if (eventName === event || eventName.startsWith(event + '.')) {
-                    events[event].delete(context);
+                    events[eventName].delete(context);
                 }
             }
 
