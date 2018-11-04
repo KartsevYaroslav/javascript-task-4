@@ -12,9 +12,10 @@ const isStar = false;
  */
 
 function getEmitter() {
+    const events = new Map();
+
     return {
 
-        events: new Map(),
 
         /**
          * @returns {Object}
@@ -24,16 +25,16 @@ function getEmitter() {
          * @param {Function} handler
          */
         on: function (event, context, handler) {
-            if (!this.events.has(event)) {
-                this.events.set(event, new Map());
+            if (!events.has(event)) {
+                events.set(event, new Map());
             }
-            let currEvent = this.events.get(event);
-            if (!currEvent.has(context)) {
-                currEvent.set(context, []);
+            let currContext = events.get(event);
+            if (!currContext.has(context)) {
+                currContext.set(context, []);
             }
-            let currContext = currEvent.get(context);
+            let currHandlers = currContext.get(context);
 
-            currContext.push(handler);
+            currHandlers.push(handler);
 
             return this;
         },
@@ -45,9 +46,9 @@ function getEmitter() {
          * @param {Object} context
          */
         off: function (event, context) {
-            for (let eventName of this.events.keys()) {
+            for (let eventName of events.keys()) {
                 if (eventName === event || eventName.startsWith(event + '.')) {
-                    this.events.get(event)
+                    events.get(event)
                         .delete(context);
                 }
             }
@@ -62,15 +63,14 @@ function getEmitter() {
          */
         emit: function (event) {
             const eventParts = event.split('.');
-            const eventNames = [];
-            eventNames.push(event);
+            const eventNames = [event];
             for (let i = 1; i < eventParts.length; i++) {
                 const eventName = eventParts.slice(0, eventParts.length - i);
                 eventNames.push(eventName.join('.'));
             }
 
-            for (let e of eventNames.filter(x => this.events.has(x))) {
-                let currEvent = this.events.get(e);
+            for (let e of eventNames.filter(x => events.has(x))) {
+                let currEvent = events.get(e);
                 for (let context of currEvent.keys()) {
                     currEvent
                         .get(context)
