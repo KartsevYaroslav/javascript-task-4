@@ -61,23 +61,20 @@ function getEmitter() {
          * @param {String} event
          */
         emit: function (event) {
-            if (!this.events.has(event)) {
-                this.events.set(event, new Map());
+            const eventParts = event.split('.');
+            const eventNames = [];
+            eventNames.push(event)
+            for (let i=1;i<eventParts.length;i++){
+                const eventName = eventParts.slice(0,eventParts.length-i);
+                eventNames.push(eventName.join('.'));
             }
-            for (let context of this.events.get(event)
-                .keys()) {
-                this.events.get(event)
-                    .get(context)
-                    .forEach(handler => {
-                        handler.call(context);
-                    });
-            }
-            const prefix = event.split('.')[0];
-
-            if (prefix !== event) {
-                for (let context of this.events.get(prefix)
-                    .keys()) {
-                    this.events.get(prefix)
+            for (let e of eventNames) {
+                if (!this.events.has(e)) {
+                    this.events.set(e, new Map());
+                }
+                let currEvent = this.events.get(e);
+                for (let context of currEvent.keys()) {
+                    currEvent
                         .get(context)
                         .forEach(handler => {
                             handler.call(context);
